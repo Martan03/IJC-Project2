@@ -11,7 +11,7 @@
 #include <inttypes.h>
 #include <stdarg.h>
 
-#define MAX_LINE 80
+#define MAX_LINE 4095
 #define R "\x1b[91m"
 #define G "\x1b[92m"
 #define Y "\x1b[93m"
@@ -63,6 +63,11 @@ void cb_free(cb_t cb);
 
 /// @brief Prints help
 void help();
+
+#define test(something) \
+    printf("test"); \
+    something \
+    printf("test2");
 
 int main(int argc, char** argv) {
     FILE* f = stdin;
