@@ -38,7 +38,7 @@ int main() {
 
     htab_t* t = htab_init(100);
     while (read_word(s, 255, stdin)) {
-        htab_lookup_add_test(t, s);
+        htab_lookup_add(t, s);
     }
 
     htab_for_each(t, print);

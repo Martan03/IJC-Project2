@@ -33,7 +33,6 @@ size_t htab_bucket_count(const htab_t * t);     // velikost pole
 
 htab_pair_t * htab_find(const htab_t * t, htab_key_t key);  // hledání
 htab_pair_t * htab_lookup_add(htab_t * t, htab_key_t key);
-htab_pair_t* htab_lookup_add_test(htab_t* t, htab_key_t key);
 
 bool htab_erase(htab_t * t, htab_key_t key);    // ruší zadaný záznam
 
