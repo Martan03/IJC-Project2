@@ -1,6 +1,8 @@
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "htab.h"
 
 typedef struct htab_item htab_item;
@@ -11,18 +13,9 @@ struct htab_item {
 };
 
 struct htab {
-    htab_item* arr_ptr;
+    htab_item** arr_ptr;
     size_t size, arr_size;
 };
-
-#define htab_loop(inside) \
-    htab_item* tmp; \
-    for (size_t i = 0; i < t->arr_size; ++i) { \
-        tmp = &(t->arr_ptr[i]); \
-        while (tmp) { \
-            inside \
-        } \
-    } \
 
 size_t htab_hash_function(const char *str) {
     uint32_t h = 0;     // musí mít 32 bitů
@@ -33,7 +26,7 @@ size_t htab_hash_function(const char *str) {
 }
 
 htab_t* htab_init(const size_t n) {
-    htab_t* htab = calloc(1, sizeof(htab_t));
+    htab_t* htab = malloc(sizeof(htab_t));
     if (!htab)
         return NULL;
     
@@ -56,53 +49,136 @@ size_t htab_bucket_count(const htab_t* t) {
     return t->arr_size;
 }
 
+htab_item* _htab_find(const htab_t* t, htab_key_t key, bool add) {
+    // Get key index using hash function
+    int index = htab_hash_function(key) % t->arr_size;
+
+    // First item on given index
+    htab_item* prev = NULL;
+    htab_item* tmp = t->arr_ptr[index];
+
+    while (tmp) {
+        // Return item with given key
+        if (strcmp(tmp->data.key, key) == 0)
+            return tmp;
+        
+        // Get next item
+        prev = tmp;
+        tmp = tmp->next;
+    }
+
+    if (!add)
+        return NULL;
+
+    // Creates new item if requested
+    tmp = calloc(1, sizeof(htab_item));
+    if (prev)
+        prev->next = tmp;
+    else
+        t->arr_ptr[index] = tmp;
+        
+    return tmp;
+}
+
 htab_pair_t* htab_find(const htab_t* t, htab_key_t key) {
-    htab_item* tmp;
-    for (htab_item* i = t->arr_ptr; i; ++i) {
-        tmp = i;
-        while (tmp) {
-            if (strcmp(i->data.key, key) == 0)
-                return &(i->data);
-            tmp = tmp->next;
-        }
+    int index = htab_hash_function(key) % t->arr_size;
+    htab_item* tmp = t->arr_ptr[index];
+    while (tmp) {
+        if (strcmp(tmp->data.key, key) == 0)
+            return &(tmp->data);
+        tmp = tmp->next;
     }
     return NULL;
 }
 
+htab_pair_t* htab_lookup_add_test(htab_t* t, htab_key_t key) {
+    htab_item* item = _htab_find(t, key, true);
+
+    if (item->data.key) {
+        item->data.value++;
+        return &(item->data);
+    }
+
+    size_t key_len = strlen(key) + 1;
+    char* new_key = malloc(key_len);
+    memcpy(new_key, key, key_len);
+    
+    item->data.key = new_key;
+    item->data.value = 1;
+
+    return &(item->data);
+}
+
 htab_pair_t* htab_lookup_add(htab_t* t, htab_key_t key) {
-    size_t index = htab_hash_function(key);
-    htab_item* tmp = &(t->arr_ptr[index]);
+    size_t index = htab_hash_function(key) % t->arr_size;
+    htab_item* tmp = t->arr_ptr[index];
+    htab_item* prev = NULL;
     while (tmp) {
         if (strcmp(tmp->data.key, key) == 0) {
             tmp->data.value++;
             return &(tmp->data);
         }
+        prev = tmp;
+        tmp = tmp->next;
     }
 
     htab_item* item = calloc(1, sizeof(htab_item));
     if (!item)
         return NULL;
 
-    item->data.key = key;
+    size_t key_len = strlen(key) + 1;
+    char* new_key = malloc(key_len);
+    memcpy(new_key, key, key_len);
+    item->data.key = new_key;
     item->data.value = 1;
-    tmp->next = item;
 
-    return item;
+    if (!prev)
+        t->arr_ptr[index] = item;
+    else
+        prev->next = item;
+
+    return &(item->data);
+}
+
+bool htab_erase(htab_t* t, htab_key_t key) {
+    int index = htab_hash_function(key) % t->arr_size;
+    htab_item* tmp = t->arr_ptr[index];
+    htab_item* prev = t->arr_ptr[index];
+    while (tmp) {
+        if (strcmp(tmp->data.key, key) == 0) {
+            prev->next = tmp->next;
+            free((char*)tmp->data.key);
+            free(tmp);
+            return true;
+        }
+        prev = tmp;
+        tmp = tmp->next;
+    }
+    return false;
 }
 
 void htab_for_each(const htab_t* t, void (*f)(htab_pair_t* data)) {
-    htab_loop(
-        f(&tmp->data);
-        tmp = tmp->next;
-    );
+    htab_item* tmp;
+    for (size_t i = 0; i < t->arr_size; ++i) {
+        tmp = t->arr_ptr[i];
+        while (tmp) {
+            f(&(tmp->data));
+            tmp = tmp->next;
+        }
+    }
 }
 
 void htab_clear(htab_t* t) {
-    htab_loop(
-        htab_item* next = tmp->next;
-        free(tmp);
-        tmp = next;
-    );
+    htab_item* tmp;
+    for (size_t i = 0; i < t->arr_size; ++i) {
+        tmp = t->arr_ptr[i];
+        while (tmp) {
+            htab_item* next = tmp->next;
+            free((char*)tmp->data.key);
+            free(tmp);
+            tmp = next;
+        }
+    }
 }
 
 void htab_free(htab_t* t) {
