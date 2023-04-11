@@ -70,6 +70,8 @@ void help();
     printf("test2");
 
 int main(int argc, char** argv) {
+    (void)argc;
+
     FILE* f = stdin;
     int n = 10;
     while(*++argv) {
