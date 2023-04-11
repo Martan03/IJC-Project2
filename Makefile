@@ -1,13 +1,15 @@
-OUT:=tail
 CFLAGS:=-g -Wall -Wextra -std=c11 -pedantic -fsanitize=address -fPIC
 LDFLAGS:=-fsanitize=address
 RFLAGS:=-std=c17 -lm -DNDEBUG -O3
 
-tail:
+.PHONY: default clean
+
+default: tail wordcount wordcount-dynamic
 
 dep:=$(shell $(CC) -MM *.c > dep.d)
 -include dep.d
 
+tail:
 
 wordcount: wordcount.o io.o libhtab.a
 	$(CC) $(CFLAGS) -o $@ $^
