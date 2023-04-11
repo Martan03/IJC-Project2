@@ -1,0 +1,5 @@
+*.o
+tail
+wordcount
+wordcount-dynamic
+dep.d
