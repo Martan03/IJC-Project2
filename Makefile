@@ -2,24 +2,27 @@ CC:=clang
 OUT:=tail
 CFLAGS:=-g -Wall -Wextra -std=c11 -pedantic -fsanitize=address
 RFLAGS:=-std=c17 -lm -DNDEBUG -O3
-OBJS:=$(patsubst src/%.c, obj/%.o, $(CFILES))
 
-debug: wordcount
+tail: tail.o
 
-release: $(CFILES)
-	$(CC) $(RFLAGS) -o bin/release/$(OUT) $(CFILES)
+wordcount: wordcount.o io.o libhtab.a
+	clang $(CFLAGS) -o $@ $^
 
-./obj/tail.o: ./src/tail.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+wordcount-dynamic: wordcount.o io.o libhtab.so
+	clang $(CFLAGS) -o $@ $^
 
-wordcount: obj/wordcount.o obj/io.o obj/htab.o
-	$(CC) $(CFLAGS) -o bin/debug/$@ $^
+libhtab.a: htab_erase.o htab_find.o htab_for_each.o htab_free.o htab_hash_function.o htab_init.o htab_lookup_add.o htab_size.o
+	ar r $@ $^
 
-obj/wordcount.o: src/wordcount.c ./src/io.h ./src/htab.h
-obj/io.o: src/io.c
+libhtab.so: htab_erase.o htab_find.o htab_for_each.o htab_free.o htab_hash_function.o htab_init.o htab_lookup_add.o htab_size.o
+	clang -shared -o $@ $^
 
-obj/%.o: ./src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+wordcount.o: wordcount.c io.h htab.h
+io.o: io.c
+htab_%.o: htab_%.c private_htab.h 
+
+%.o: %.c
+	clang $(CFLAGS) -c $< -fPIC -o $@
 
 clean:
-	rm $(OBJS)
+	-rm *.o libhtab.a libhtab.so tail wordcount wordcount-dynamic
