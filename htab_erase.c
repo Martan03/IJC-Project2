@@ -16,6 +16,8 @@ bool htab_erase(htab_t* t, htab_key_t key) {
             free((char*) tmp->data.key);
             free(tmp);
 
+            t->size--;
+
             return true;
         }
         

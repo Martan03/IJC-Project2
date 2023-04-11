@@ -23,6 +23,8 @@ int main() {
     printf("\n");
     htab_for_each(t, print);
 
+    htab_statistics(t);
+
     free(s);
     htab_free(t);
     return 0;

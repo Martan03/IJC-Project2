@@ -20,5 +20,7 @@ htab_pair_t* htab_lookup_add(htab_t* t, htab_key_t key) {
     item->data.key = new_key;
     item->data.value = 1;
 
+    t->size++;
+
     return &(item->data);
 }
