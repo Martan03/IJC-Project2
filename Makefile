@@ -1,6 +1,6 @@
-CFLAGS:=-g -Wall -Wextra -std=c11 -pedantic -fsanitize=address -fPIC
-LDFLAGS:=-fsanitize=address
-RFLAGS:=-std=c17 -lm -DNDEBUG -O3
+CFLAGS:=-g -Wall -Wextra -std=c11 -pedantic -O2 -fPIC
+HTAB:=htab_erase.o htab_find.o htab_for_each.o htab_free.o htab_init.o \
+	  htab_hash_function.o htab_lookup_add.o htab_size.o htab_statistics.o
 
 .PHONY: default clean
 
@@ -17,10 +17,10 @@ wordcount: wordcount.o io.o libhtab.a
 wordcount-dynamic: wordcount.o io.o libhtab.so
 	$(CC) $(CFLAGS) -o $@ $^
 
-libhtab.a: htab_erase.o htab_find.o htab_for_each.o htab_free.o htab_hash_function.o htab_init.o htab_lookup_add.o htab_size.o htab_statistics.o
+libhtab.a: $(HTAB)
 	ar r $@ $^
 
-libhtab.so: htab_erase.o htab_find.o htab_for_each.o htab_free.o htab_hash_function.o htab_init.o htab_lookup_add.o htab_size.o htab_statistics.o
+libhtab.so: $(HTAB)
 	$(CC) -shared -o $@ $^
 
 clean:

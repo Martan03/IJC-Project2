@@ -9,7 +9,7 @@ int read_word(char *s, int max, FILE *f) {
         ;
     
     if (c == EOF)
-        return 0;
+        return EOF;
 
     int i = 0;
     bool warn = true;
@@ -23,5 +23,6 @@ int read_word(char *s, int max, FILE *f) {
         }
     } while ((c = fgetc(f)) != EOF && !isspace(c));
     s[i] = '\0';
-    return i;
+
+    return (c == EOF) ? EOF : i;
 }
