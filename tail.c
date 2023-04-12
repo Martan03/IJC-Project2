@@ -11,7 +11,10 @@
 #include <inttypes.h>
 #include <stdarg.h>
 
+// Value for maximum line length
 #define MAX_LINE 4095
+
+// Creating macros for ansi color codes
 #define R "\x1b[91m"
 #define G "\x1b[92m"
 #define Y "\x1b[93m"
@@ -19,8 +22,10 @@
 #define BB "\x1b[90m"
 #define RS "\x1b[0m"
 
+// Macro for printing error message
 #define printe(msg) fprintf(stderr, R "Error: " RS "%s", msg)
 
+/// @brief Circular buffer struct
 typedef struct
 {
     char **data;
@@ -64,34 +69,38 @@ void cb_free(cb_t cb);
 /// @brief Prints help
 void help();
 
-#define test(something) \
-    printf("test"); \
-    something \
-    printf("test2");
-
 int main(int argc, char** argv) {
-    (void)argc;
+    // Silences unused variable warning
+    (void) argc;
 
+    // Sets default behaviour
     FILE* f = stdin;
     int n = 10;
+
+    // Parsing arguments
     while(*++argv) {
+        // Help flag
         if (strcmp(*argv, "-h") == 0 || strcmp(*argv, "--help") == 0) {
             help();
             return 0;
         }
+        // Number flag
         else if (strcmp(*argv, "-n") == 0) {
             n = atoi(*++argv);
         }
         else {
+            // If file is not stdin, it was set previously
             if (f != stdin) {
                 printe("multiple files not supported\n");
                 fclose(f);
                 return 1;
             }
+    
             f = fopen(*argv, "r");
+
+            // Prints error message when file doesn't exist
             if (!f) {
-                printe("invalid usage, ");
-                fprintf(stderr, "'%s' is not file nor flag.\n", *argv);
+                printe("invalid usage, type" Y " tail -h" RS " to show help.\n");
                 return 1;
             }
         }
@@ -104,43 +113,55 @@ int main(int argc, char** argv) {
 }
 
 void process(FILE *f, int n) {
+    // Creates circular buffer
     cb_t cb = cb_create(n);
 
+    // Allocates line string and checks if allocated correctly
     char* line = malloc(MAX_LINE);
     line_malloced(line);
 
     bool warn = true;
     int count = 0;
+
+    // Reading loop
     while ((count = get_line(f, line, MAX_LINE))) {
-        if (line[count - 1] != '\n') {
+        // Checks if line was too long
+        if (line[count - 1] != '\n' && count == MAX_LINE - 1) {
             line[count - 1] = '\n';
+            // Prints error message, if not printed already
             if (warn) {
                 printe("line too long\n");
                 warn = false;
             }
+
+            // Reads remaining characters from line
             fscanf(f, "%*[^\n]");
             fscanf(f, "\n");
         }
 
+        // Puts line to circular buffer, gets replaced line
         line = cb_put(&cb, line);
 
+        // If line wasn't malloced before, malloc it
         if (!line) {
             line = malloc(MAX_LINE);
             line_malloced(line);
         }
     }
 
+    // Prints circular buffer
     while (cb.start != cb.end) {
         printf("%s", cb_get(&cb));
     }
 
+    // Frees circular buffer and line
     cb_free(cb);
     free(line);
 }
 
 static inline void line_malloced(char* line) {
     if (!line) {
-        printe("allocating memory");
+        printe("allocating memory\n");
         exit(1);
     }
 }
@@ -148,8 +169,11 @@ static inline void line_malloced(char* line) {
 size_t get_line(FILE *f, char* line, size_t len) {
     int c = 0;
     size_t org = len;
+
+    // Reads characters until it's not eof, new line, or longer than allowed
     while (--len && c != '\n' && (c = fgetc(f)) != EOF)
         *line++ = c;
+
     *line = '\0';
     return org - len - 1;
 }
