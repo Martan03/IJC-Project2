@@ -27,7 +27,9 @@ int main() {
     }
 
     // Initiliazies hash table
-    htab_t* t = htab_init(314159);
+    // I chose a size of 15000 because I've read that
+    // files are 10000 words on average. I added a margin of 33% to it
+    htab_t* t = htab_init(15000);
     htab_pair_t* pair = NULL;
 
     // Reads words and adds them to hash table

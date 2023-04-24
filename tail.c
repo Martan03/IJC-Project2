@@ -228,7 +228,6 @@ void help() {
     int r = 0, g = 220;
     for (size_t i = 0; i < strlen(name); ++i)
         printf("\x1b[38;2;%lu;%lu;255m%c", r + i * 25, g - i * 20, name[i]);
-    printf("");
 
     // Prints usage
     printf(G "\nUsage: " W "tail " BB "[flags] [file]\n\n" RS);
