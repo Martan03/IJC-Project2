@@ -1,18 +1,3 @@
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<HTML>
-<HEAD>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-2">
-<META HTTP-EQUIV="Content-language" CONTENT="cs">
-<TITLE>IJC: DU2 </TITLE>
-</HEAD>
-<BODY>
-
-<H1>IJC: DU2</H1>
-
-<HR>
-<XMP>
-
 Jazyk C                       DU2                      21.3.2023
 ----------------------------------------------------------------
 
@@ -345,17 +330,4 @@ Obecné pokyny pro vypracování domácích úkolů (rev 21.3.2023)
 
 * Opsané úkoly budou hodnoceny 0 bodů pro všechny zůčastněné
   a to bez výjimky (+bonus v podobě návštěvy u disciplinární komise).
-
-
-</XMP>
-<HR>
-<ADDRESS>
-Poslední modifikace: <!-- begin flastmod -->
-21. March 2023<!-- end -->
-<BR>
-Pokud naleznete na této stránce chybu, oznamte to dopisem na adresu
-peringer AT fit.vutbr.cz
-</ADDRESS>
-</body>
-</html>
 
